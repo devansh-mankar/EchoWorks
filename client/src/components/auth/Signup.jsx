@@ -4,7 +4,7 @@ import { AnimatedGridPattern } from "../magicui/animated-grid-pattern";
 import { FcGoogle } from "react-icons/fc";
 import { FaApple } from "react-icons/fa";
 import { toast } from "sonner";
-import useAuth from "@/hooks/useAuth"; // ⬅️ grab context
+import useAuth from "../../hooks/useAuth";
 
 const Signup = () => {
   const navigate = useNavigate();

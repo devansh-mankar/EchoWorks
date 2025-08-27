@@ -1,5 +1,5 @@
 // src/components/layout/Header.jsx
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FlipText } from "../magicui/flip-text";
 import useAuth from "@/hooks/useAuth";
@@ -27,21 +27,32 @@ function Avatar({ name = "", size = 36 }) {
 export default function Header() {
   const navigate = useNavigate();
   const { user, logout, loading } = useAuth();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef(null);
 
-  const handleLogout = async (e) => {
-    // no preventDefault here, otherwise <details> can hang
-
-    e.stopPropagation();
+  const handleLogout = async () => {
     try {
-      console.log("Logging out...");
       await logout();
     } finally {
-      // close the <details> manually
-      const detailsEl = e.currentTarget.closest("details");
-      if (detailsEl) detailsEl.open = false;
+      setMenuOpen(false);
       navigate("/", { replace: true });
     }
   };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setMenuOpen(false);
+      }
+    }
+    if (menuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [menuOpen]);
 
   return (
     <header className="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-[100]">
@@ -80,14 +91,11 @@ export default function Header() {
               <div className="h-9 w-36 rounded-full bg-gray-200 animate-pulse" />
             </div>
           ) : user ? (
-            <details className="relative z-[200]">
-              <summary
-                className="list-none flex items-center gap-3 rounded-full border border-gray-200 bg-white px-3 py-1.5 shadow-sm hover:shadow-md transition cursor-pointer"
-                onClick={(e) => {
-                  e.preventDefault(); // only here, not on logout button
-                  const el = e.currentTarget.parentElement;
-                  el.open = !el.open;
-                }}
+            <div className="relative z-[200]" ref={menuRef}>
+              <button
+                type="button"
+                onClick={() => setMenuOpen((prev) => !prev)}
+                className="flex items-center gap-3 rounded-full border border-gray-200 bg-white px-3 py-1.5 shadow-sm hover:shadow-md transition cursor-pointer"
               >
                 <Avatar name={user?.name} />
                 <span className="text-sm font-medium text-gray-700 max-w-[180px] truncate">
@@ -104,68 +112,73 @@ export default function Header() {
                     clipRule="evenodd"
                   />
                 </svg>
-              </summary>
+              </button>
 
-              <div
-                className="absolute right-0 mt-2 w-56 rounded-2xl border border-gray-200 bg-white shadow-xl overflow-hidden"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <div className="px-4 py-3 border-b border-gray-100">
-                  <p className="text-sm text-gray-500">Signed in as</p>
-                  <p className="truncate font-medium text-gray-900">
-                    {user?.email}
-                  </p>
-                </div>
+              {menuOpen && (
+                <>
+                  {/* Overlay */}
+                  <div className="fixed inset-0 z-[250]" aria-hidden="true" />
 
-                <div className="py-1">
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      e.currentTarget.closest("details").open = false;
-                      navigate("/profile");
-                    }}
-                    className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
+                  {/* Dropdown */}
+                  <div
+                    className="absolute right-0 mt-2 w-56 z-[300] rounded-2xl border border-gray-200 bg-white shadow-xl overflow-hidden"
+                    role="menu"
                   >
-                    Profile
-                  </button>
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      e.currentTarget.closest("details").open = false;
-                      navigate("/settings");
-                    }}
-                    className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
-                  >
-                    Settings
-                  </button>
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      e.currentTarget.closest("details").open = false;
-                      navigate("/billing");
-                    }}
-                    className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
-                  >
-                    Billing
-                  </button>
-                </div>
+                    <div className="px-4 py-3 border-b border-gray-100">
+                      <p className="text-sm text-gray-500">Signed in as</p>
+                      <p className="truncate font-medium text-gray-900">
+                        {user?.email}
+                      </p>
+                    </div>
 
-                <div className="border-t border-gray-100" />
+                    <div className="py-1">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setMenuOpen(false);
+                          navigate("/profile");
+                        }}
+                        className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
+                      >
+                        Profile
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setMenuOpen(false);
+                          navigate("/settings");
+                        }}
+                        className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
+                      >
+                        Settings
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setMenuOpen(false);
+                          navigate("/billing");
+                        }}
+                        className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
+                      >
+                        Billing
+                      </button>
+                    </div>
 
-                <div className="py-1">
-                  <button
-                    type="button"
-                    onClick={() => navigate("/login")}
-                    className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50"
-                  >
-                    Log out
-                  </button>
-                </div>
-              </div>
-            </details>
+                    <div className="border-t border-gray-100" />
+
+                    <div className="py-1">
+                      <button
+                        type="button"
+                        onClick={handleLogout}
+                        className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50"
+                      >
+                        Log out
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
           ) : (
             <>
               <button
