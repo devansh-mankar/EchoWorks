@@ -12,7 +12,7 @@ export default function Landing() {
         maxOpacity={0.1}
         duration={3}
         repeatDelay={1}
-        className="absolute inset-0 [mask-image:radial-gradient(1000px_circle_at_center,white,transparent)] 
+        className="pointer-events-none absolute inset-0 [mask-image:radial-gradient(1000px_circle_at_center,white,transparent)] 
                    skew-y-12 h-[150%] -top-[25%] fill-gray-400/30 stroke-gray-400/30"
         width={40}
         height={40}
