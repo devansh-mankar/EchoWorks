@@ -4,10 +4,11 @@ import { AnimatedGridPattern } from "../magicui/animated-grid-pattern";
 import { FcGoogle } from "react-icons/fc";
 import { FaApple } from "react-icons/fa";
 import { toast } from "sonner";
-import api from "../../services/api";
+import useAuth from "@/hooks/useAuth";
 
 const Login = () => {
   const navigate = useNavigate();
+  const { login } = useAuth(); // ⬅️ grab context method
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -19,7 +20,7 @@ const Login = () => {
 
     setIsLoading(true);
     try {
-      const data = await api.login(email, password);
+      const data = await login(email, password); // ⬅️ context updates user state
       toast.success(data?.message || "Logged in!");
       navigate("/Home");
     } catch (err) {

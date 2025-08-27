@@ -4,10 +4,11 @@ import { AnimatedGridPattern } from "../magicui/animated-grid-pattern";
 import { FcGoogle } from "react-icons/fc";
 import { FaApple } from "react-icons/fa";
 import { toast } from "sonner";
-import api from "../../services/api";
+import useAuth from "@/hooks/useAuth"; // ⬅️ grab context
 
 const Signup = () => {
   const navigate = useNavigate();
+  const { signup } = useAuth(); // ⬅️ grab context method
   const [isLoading, setIsLoading] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -32,7 +33,7 @@ const Signup = () => {
 
     setIsLoading(true);
     try {
-      const data = await api.signup({ name, email, phone, password });
+      const data = await signup({ name, email, phone, password }); // ⬅️ context updates user
       toast.success(data?.message || "Signup successful!");
       navigate("/Home");
     } catch (err) {
@@ -41,7 +42,6 @@ const Signup = () => {
       setIsLoading(false);
     }
   };
-
   return (
     <div className="min-h-screen flex items-center justify-center relative bg-gradient-to-br from-blue-50 via-white to-purple-50 overflow-hidden">
       <AnimatedGridPattern

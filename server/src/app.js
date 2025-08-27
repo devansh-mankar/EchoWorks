@@ -21,14 +21,6 @@ app.use(
       return allow.includes(origin) ? cb(null, true) : cb(null, false);
     },
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-    allowedHeaders: [
-      "Origin",
-      "X-Requested-With",
-      "Content-Type",
-      "Accept",
-      "Authorization",
-    ],
   })
 );
 // Express 5: use (.*), not '*'

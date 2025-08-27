@@ -17,12 +17,14 @@ class AuthController {
       });
       const { accessToken, refreshToken } = generateTokens(user._id);
 
+      // store refresh token in DB
       await User.findByIdAndUpdate(
         user._id,
         { refreshToken },
         { new: false, validateBeforeSave: false }
       );
 
+      // set refresh cookie
       res.cookie("refreshToken", refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
@@ -44,8 +46,8 @@ class AuthController {
         },
         accessToken,
       });
-    } catch (error) {
-      next(error);
+    } catch (err) {
+      next(err);
     }
   }
 
@@ -84,8 +86,8 @@ class AuthController {
         },
         accessToken,
       });
-    } catch (error) {
-      next(error);
+    } catch (err) {
+      next(err);
     }
   }
 
@@ -124,18 +126,35 @@ class AuthController {
         },
         accessToken,
       });
-    } catch (error) {
-      next(error);
+    } catch (err) {
+      next(err);
     }
   }
 
-  // POST /api/auth/logout
+  // ✅ POST /api/auth/logout  (SERVER-SIDE — NO localStorage / setUser HERE)
   async logout(req, res, next) {
     try {
-      res.clearCookie("refreshToken");
-      res.json({ success: true, message: "Logged out successfully" });
-    } catch (error) {
-      next(error);
+      const token = req.cookies?.refreshToken;
+
+      if (token) {
+        // find user with this refresh token and clear it
+        await User.findOneAndUpdate(
+          { refreshToken: token },
+          { $unset: { refreshToken: 1 } },
+          { new: false }
+        );
+      }
+
+      // always clear cookie
+      res.clearCookie("refreshToken", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+      });
+
+      return res.json({ success: true, message: "Logged out" });
+    } catch (err) {
+      next(err);
     }
   }
 
@@ -159,8 +178,8 @@ class AuthController {
       });
 
       res.json({ success: true, accessToken });
-    } catch (error) {
-      next(error);
+    } catch (err) {
+      next(err);
     }
   }
 }

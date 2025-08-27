@@ -1,12 +1,19 @@
+// src/main.jsx
 import React from "react";
-import { createRoot } from "react-dom/client";
+import ReactDOM from "react-dom/client";
 import "./index.css";
 import App from "./App.jsx";
+import AuthProvider from "./context/AuthProvider";
+import { Toaster } from "sonner";
+import { BrowserRouter } from "react-router-dom";
 
-import { Toaster } from "../src/components/ui/sonner";
-createRoot(document.getElementById("root")).render(
+ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <App />
-    <Toaster toastOptions={{ className: "p-1 mt-20" }} />
+    <BrowserRouter>
+      <AuthProvider>
+        <App />
+        <Toaster toastOptions={{ className: "p-1 mt-20" }} />
+      </AuthProvider>
+    </BrowserRouter>
   </React.StrictMode>
 );
